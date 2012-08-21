@@ -25,7 +25,7 @@
                              :length length
                              :height height)))
 
-(defun pvector-ref (vector index)
+(defun pvector-get (vector index)
   (node-get (get-node vector index)
             (index-at-height index 0)))
 
@@ -49,10 +49,31 @@
                                  :length (1+ length)
                                  :height (1+ height))))
       (t
-       (make-persistent-vector :root (node-insert root tail length height)
+       (make-persistent-vector :root (node-push-deep root tail length height)
                                :tail (make-node item)
                                :length (1+ length)
                                :height height)))))
+
+(defun pvector-update (vector index item)
+  (declare (fixnum index))
+  (let ((root (pv-root vector))
+        (tail (pv-tail vector))
+        (length (pv-length vector))
+        (height (pv-height vector))
+        (tail-offset (tail-offset vector)))
+    (if (>= index tail-offset)
+        (make-persistent-vector :root root
+                                :tail (node-update
+                                       tail
+                                       (index-at-height index 0)
+                                       item)
+                                :length length
+                                :height height)
+        (make-persistent-vector :root (node-update-deep
+                                       root index item height)
+                                :tail tail
+                                :length length
+                                :height height))))
 
 (defun index-at-height (index height)
   (declare (fixnum index height))
@@ -93,7 +114,7 @@
   (declare (fixnum index))
   (aref node index))
 
-(defun node-set (node index value)
+(defun node-update (node index value)
   (declare (fixnum index))
   (let ((new-node (copy-node node)))
     (setf (aref new-node index)
@@ -111,12 +132,23 @@
       node
       (make-node (node-grow node (1- height)))))
 
-(defun node-insert (node item length height)
+(defun node-update-deep (node index item height)
+  (declare (fixnum index height))
+  (if (= height 0)
+      (node-update node (index-at-height index 0) item)
+      (let ((next-index (index-at-height index height)))
+        (node-update node next-index
+                     (node-update-deep (node-get node next-index)
+                                       index
+                                       item
+                                       (1- height))))))
+
+(defun node-push-deep (node item length height)
   (declare (fixnum length height))
   (if (= height 1)
       (node-push node item)
       (let ((next-index (index-at-height (1- length) height)))
         (if-let (child (node-get node next-index))
-          (node-set node next-index
-                    (node-insert child item length (1- height)))
+          (node-update node next-index
+                    (node-push-deep child item length (1- height)))
           (node-push node (node-grow item (1- height)))))))
