@@ -78,7 +78,7 @@
         (reduce (lambda (node height)
                   (node-get node
                             (index-at-height index height)))
-                (range height 0)
+                (iota height :start height :step -1)
                 :initial-value (pv-root vector)))))
 
 (defun make-node (&rest items)

@@ -2,8 +2,7 @@
   (:use #:cl #:alexandria)
   (:export
    #:make-32-array
-   #:rsh
-   #:range))
+   #:rsh))
 (cl:in-package #:persistine.utils)
 
 (declaim (inline make-32-array))
@@ -16,15 +15,3 @@
 (defun rsh (integer count)
   (declare (fixnum integer count))
   (ash integer (- count)))
-
-(declaim (inline range))
-(defun range (from to &optional (step 1))
-  (let ((step (if (> from to)
-                  (- step)
-                  step))
-        (test (if (> from to)
-                  (lambda (i to) (<= i to))
-                  (lambda (i to) (>= i to)))))
-    (do ((i from (+ i step))
-         (result (list) (push i result)))
-        ((funcall test i to) (nreverse result)))))
