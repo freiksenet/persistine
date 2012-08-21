@@ -2,7 +2,7 @@
   :description "Persistent data structures"
   :author "Mikhail Novikov <freiksenet@gmail.com>"
   :license "MIT"
-  :depends-on (#:alexandria #:optima)
+  :depends-on (#:alexandria)
   :components
   ((:module "src"
             :serial t

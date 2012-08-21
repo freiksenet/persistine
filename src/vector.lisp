@@ -1,5 +1,5 @@
 (cl:defpackage #:persistine.vector
-  (:use #:cl #:alexandria #:optima #:persistine.utils)
+  (:use #:cl #:alexandria #:persistine.utils)
   (:export
    #:make-persistent-vector
    #:pvector-p
