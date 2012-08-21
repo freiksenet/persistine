@@ -42,7 +42,7 @@
                                  :tail new-tail
                                  :length (1+ length)
                                  :height height)))
-      ((> (rsh length 5) (capacity height)) ; No space left in root
+      ((> length (capacity height)) ; No space left in root
        (let ((new-root (make-node root (node-grow tail height))))
          (make-persistent-vector :root new-root
                                  :tail (make-node item)
@@ -60,7 +60,7 @@
 
 (defun capacity (height)
   (declare (fixnum height))
-  (ash 1 (* height 5)))
+  (ash 1 (* (1+ height) 5)))
 
 (defun tail-offset (vector)
   (let ((length (pv-length vector)))
