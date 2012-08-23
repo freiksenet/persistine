@@ -3,8 +3,11 @@
   (:export
    #:make-persistent-vector
    #:pvector-p
-   #:pvector-ref
-   #:pvector-extend))
+   #:pvector-length
+   #:pvector-get
+   #:pvector-extend
+   #:pvector-update
+   #:pvector-pop))
 (cl:in-package #:persistine.vector)
 
 (declaim (optimize (speed 3)))
@@ -24,6 +27,9 @@
                              :tail tail
                              :length length
                              :height height)))
+
+(defun pvector-length (vector)
+  (pv-length vector))
 
 (defun pvector-get (vector index)
   (node-get (get-node vector index)
