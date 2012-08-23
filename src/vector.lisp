@@ -75,6 +75,26 @@
                                 :length length
                                 :height height))))
 
+(defun pvector-pop (vector)
+  (let ((root (pv-root vector))
+        (tail (pv-tail vector))
+        (length (pv-length vector))
+        (height (pv-height vector))
+        (tail-offset (tail-offset vector)))
+    (if (> (- length tail-offset) 0)
+        (make-persistent-vector :root root
+                                :tail (node-pop tail)
+                                :length (1- length)
+                                :height height)
+        (make-persistent-vector :root (node-pop-deep root length height)
+                                :tail (node-get vector (- length 2))
+                                :length (1- length)
+                                :height (if (> height 1)
+                                            (1- height)
+                                            height)))))
+
+;; Helper functions related to shifting magic
+
 (defun index-at-height (index height)
   (declare (fixnum index height))
   (logand (rsh index (* height 5)) 31))
@@ -88,6 +108,8 @@
     (if (< length 32)
         0
         (ash (rsh (1- length) 5) 5))))
+
+;; Helper functions related to nodes of the tree
 
 (defun get-node (vector index)
   "Returns node that holds item of given index"
@@ -110,6 +132,9 @@
 (defun copy-node (node)
   (copy-array node))
 
+(defun node-size (node)
+  (fill-pointer node))
+
 (defun node-get (node index)
   (declare (fixnum index))
   (aref node index))
@@ -124,6 +149,11 @@
 (defun node-push (node value)
   (let ((new-node (copy-node node)))
     (vector-push value new-node)
+    new-node))
+
+(defun node-pop (node)
+  (let ((new-node (copy-node node)))
+    (vector-pop new-node)
     new-node))
 
 (defun node-grow (node height)
@@ -152,3 +182,13 @@
           (node-update node next-index
                     (node-push-deep child item length (1- height)))
           (node-push node (node-grow item (1- height)))))))
+
+(defun node-pop-deep (node length height)
+  (declare (fixnum length height))
+  (let ((next-index (index-at-height (- length 2) height)))
+    (if (> height 1)
+        (let ((child (node-pop-deep node length (1- height))))
+          (if (> (node-size child) 0)
+              (node-update node next-index child)
+              (node-pop node)))
+        (node-pop node))))
