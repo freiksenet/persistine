@@ -11,10 +11,11 @@
              (:file "vector")))))
 
 (asdf:defsystem #:persistine.tests
-  :depends-on (#:cl-pds
+  :depends-on (#:persistine
                #:fiveam)
   :components
   ((:module "tests"
             :serial t
             :components
-            ())))
+            ((:file "main")
+             (:file "vector")))))
