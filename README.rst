@@ -1,3 +1,5 @@
+Abandoned, I no longer code it Common Lisp. Ohwell.
+
 persistine - holy and pure data structures for Common Lisp
 =================================================================
 
